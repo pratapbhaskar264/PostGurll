@@ -58,7 +58,7 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		UserId      int    `json:"userId"`
 		Id          int    `json:"id"`
 		Title       string `json:"title"`
-		IsCompleted bool   `json:"userId"`
+		IsCompleted bool   `json:"completed"`
 	}
 
 	er := json.NewDecoder(res.Body).Decode(&responseBody)
@@ -68,7 +68,17 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, responseBody.Title)
+	// fmt.Fprintf(w, responseBody.Title)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	e := json.NewEncoder(w).Encode(responseBody)
+
+	if e != nil {
+
+		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
+		return
+	}
 
 }
 
