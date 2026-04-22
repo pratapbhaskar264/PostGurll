@@ -1,12 +1,86 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"postgurrll/utils"
+	"net/http"
 )
 
+// "postgurrll/utils"
+func Greet(w http.ResponseWriter, r *http.Request) {
+
+	//major issue in postman
+	// we will not be able to hardcode this json
+	var data struct {
+		Name  string `json:"name"`
+		Class int    `json:"class"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+
+	if err != nil {
+		http.Error(w, "InvalidBodyRequest", http.StatusBadRequest)
+		fmt.Fprintf(w, "InvalidBody")
+		return
+	}
+
+	fmt.Fprintf(w, data.Name)
+}
+
+func dataFetch(w http.ResponseWriter, r *http.Request) {
+
+	var data struct {
+		URL string `json:"url"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+
+	if err != nil {
+		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
+		return
+	}
+
+	res, err := http.Get(data.URL)
+
+	if err != nil {
+		http.Error(w, "DataNotFetched", http.StatusBadRequest)
+		return
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		http.Error(w, "NotOk", http.StatusBadRequest)
+		return
+	}
+
+	var responseBody struct {
+		UserId      int    `json:"userId"`
+		Id          int    `json:"id"`
+		Title       string `json:"title"`
+		IsCompleted bool   `json:"userId"`
+	}
+
+	er := json.NewDecoder(res.Body).Decode(&responseBody)
+
+	if er != nil {
+		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, responseBody.Title)
+
+}
+
 func main() {
-	fmt.Println("Hello, World!")
-	fmt.Println(utils.A)
-	// test1()
+	fmt.Println("Hello World")
+
+	http.HandleFunc("/greet", Greet)
+	http.HandleFunc("/datadedo", dataFetch)
+
+	err := http.ListenAndServe(":8080", nil)
+
+	if err != nil {
+		fmt.Printf("error int starting the server ", err)
+	}
 }
