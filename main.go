@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // "postgurrll/utils"
@@ -39,8 +40,17 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
 		return
 	}
-
+	var responseBodyFinal struct {
+		StartTime   time.Time `json:"startTime"`
+		UserId      int       `json:"userId"`
+		Id          int       `json:"id"`
+		Title       string    `json:"title"`
+		IsCompleted bool      `json:"completed"`
+		EndTime     time.Time `json:"endTime"`
+	}
+	responseBodyFinal.StartTime = time.Now()
 	res, err := http.Get(data.URL)
+	responseBodyFinal.EndTime = time.Now()
 
 	if err != nil {
 		http.Error(w, "DataNotFetched", http.StatusBadRequest)
@@ -60,8 +70,11 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		Title       string `json:"title"`
 		IsCompleted bool   `json:"completed"`
 	}
-
 	er := json.NewDecoder(res.Body).Decode(&responseBody)
+	responseBodyFinal.UserId = responseBody.UserId
+	responseBodyFinal.Id = responseBody.Id
+	responseBodyFinal.Title = responseBody.Title
+	responseBodyFinal.IsCompleted = responseBody.IsCompleted
 
 	if er != nil {
 		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
@@ -72,10 +85,9 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	e := json.NewEncoder(w).Encode(responseBody)
+	e := json.NewEncoder(w).Encode(responseBodyFinal)
 
 	if e != nil {
-
 		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
 		return
 	}
