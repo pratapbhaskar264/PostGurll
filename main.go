@@ -3,7 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 // "postgurrll/utils"
@@ -63,31 +67,33 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var responseBody struct {
-		UserId      int    `json:"userId"`
-		Id          int    `json:"id"`
-		Title       string `json:"title"`
-		IsCompleted bool   `json:"completed"`
-	}
-	er := json.NewDecoder(res.Body).Decode(&responseBody)
-	// responseBodyFinal.UserId = responseBody.UserId
-	// responseBodyFinal.Id = responseBody.Id
-	// responseBodyFinal.Title = responseBody.Title
-	// responseBodyFinal.IsCompleted = responseBody.IsCompleted
+	bodyBytes, err := io.ReadAll(res.Body)
 
-	if er != nil {
-		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
+	if err != nil {
+		http.Error(w, "failed to read response ", http.StatusInternalServerError)
 		return
 	}
 
-	// fmt.Fprintf(w, responseBody.Title)
+	start := time.Now()
+
+	type response struct {
+		ID        string          `json:"id"`
+		LatencyMS int64           `json:"latency_ms"`
+		Data      json.RawMessage `json:"data"`
+	}
+
+	responseBodyFinal := response{
+		ID:        "REQ-" + strconv.Itoa(os.Getpid()),
+		LatencyMS: time.Since(start).Milliseconds(),
+		Data:      json.RawMessage(bodyBytes),
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 
-	e := json.NewEncoder(w).Encode(responseBody)
+	err1 := json.NewEncoder(w).Encode(responseBodyFinal)
 
-	if e != nil {
-		http.Error(w, "DataFormatMismatched", http.StatusBadRequest)
+	if err1 != nil {
+		http.Error(w, "Encoding failed", http.StatusInternalServerError)
 		return
 	}
 
