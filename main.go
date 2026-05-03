@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,7 +46,19 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
 		return
 	}
-	res, err := http.Get(data.URL)
+	// res, err := http.Get(data.URL)
+	var bodyReader io.Reader
+
+	if len(data.Payload) > 2 {
+		bodyReader = bytes.NewBuffer(data.Payload)
+	}
+	// body , err := io.ReadAll(data)
+
+	if err != nil {
+
+	}
+
+	res, err := http.NewRequest(data.Method, data.URL, bodyReader)
 	// responseBodyFinal.EndTime = time.Now()
 
 	if err != nil {
@@ -56,10 +69,10 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		http.Error(w, "NotOk", http.StatusBadRequest)
-		return
-	}
+	// if res.StatusCode != 200 {
+	// 	http.Error(w, "NotOk", http.StatusBadRequest)
+	// 	return
+	// }
 
 	bodyBytes, err := io.ReadAll(res.Body)
 
