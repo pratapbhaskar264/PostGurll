@@ -49,14 +49,14 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	// res, err := http.Get(data.URL)
 	var bodyReader io.Reader
 
-	if len(data.Payload) > 2 {
-		bodyReader = bytes.NewBuffer(data.Payload)
-	}
+	// if len(data.Payload) > 2 {
+	bodyReader = bytes.NewBuffer(data.Payload)
+	// }
 	// body , err := io.ReadAll(data)
 
-	if err != nil {
+	// if err != nil {
 
-	}
+	// }
 
 	res, err := http.NewRequest(data.Method, data.URL, bodyReader)
 	// responseBodyFinal.EndTime = time.Now()
@@ -67,14 +67,16 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer res.Body.Close()
+	// defer res.Body.Close()
 
 	// if res.StatusCode != 200 {
 	// 	http.Error(w, "NotOk", http.StatusBadRequest)
 	// 	return
 	// }
 
-	bodyBytes, err := io.ReadAll(res.Body)
+	client := http.Client{}
+
+	respo, err := client.Do(res)
 
 	if err != nil {
 		http.Error(w, "failed to read response ", http.StatusInternalServerError)
@@ -82,6 +84,7 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	start := time.Now()
+	bodyBytes, err := io.ReadAll(respo.Body)
 
 	type response struct {
 		ID        string          `json:"id"`
