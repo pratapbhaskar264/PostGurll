@@ -34,28 +34,22 @@ func Greet(w http.ResponseWriter, r *http.Request) {
 func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	var data struct {
-		URL string `json:"url"`
+		URL     string          `json:"url"`
+		Method  string          `json:"method"`
+		Payload json.RawMessage `json:"payload"`
 	}
-
+	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
 
 	if err != nil {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
 		return
 	}
-	// var responseBodyFinal struct {
-	// 	StartTime   time.Time `json:"startTime"`
-	// 	UserId      int       `json:"userId"`
-	// 	Id          int       `json:"id"`
-	// 	Title       string    `json:"title"`
-	// 	IsCompleted bool      `json:"completed"`
-	// 	EndTime     time.Time `json:"endTime"`
-	// }
-	// responseBodyFinal.StartTime = time.Now()
 	res, err := http.Get(data.URL)
 	// responseBodyFinal.EndTime = time.Now()
 
 	if err != nil {
+		fmt.Print("error in fetching data ", data.URL, err)
 		http.Error(w, "DataNotFetched", http.StatusBadRequest)
 		return
 	}
