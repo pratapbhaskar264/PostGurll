@@ -43,25 +43,18 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&data)
 
 	// get post not working in postman not recieving the body in data struct
+	// outgoing header req to confirm json?
 
 	if err != nil {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
 		return
 	}
-	// res, err := http.Get(data.URL)
+
 	var bodyReader io.Reader
 
-	// if len(data.Payload) > 2 {
 	bodyReader = bytes.NewBuffer(data.Payload)
-	// }
-	// body , err := io.ReadAll(data)
-
-	// if err != nil {
-
-	// }
 
 	res, err := http.NewRequest(data.Method, data.URL, bodyReader)
-	// responseBodyFinal.EndTime = time.Now()
 
 	if err != nil {
 		fmt.Print("error in fetching data ", data.URL, err)
@@ -69,17 +62,29 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start := time.Now()
+	res.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 
 	respo, err := client.Do(res)
 
-	if err != nil {
+	if err != nil || respo.StatusCode >= 400 {
 		http.Error(w, "failed to read response ", http.StatusInternalServerError)
 		return
 	}
 
-	start := time.Now()
+	w.Header().Set("Content-Type", "application/json")
+	// lets set outgoing header to json for the request we are making to the url
+
+	// r.Header.Set("Content-Type", "application/json")
+	fmt.Println(respo.StatusCode)
+
 	bodyBytes, err := io.ReadAll(respo.Body)
+
+	if err != nil {
+		http.Error(w, "failed to read response body", http.StatusInternalServerError)
+		return
+	}
 
 	type response struct {
 		ID        string          `json:"id"`
