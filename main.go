@@ -42,6 +42,8 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
 
+	// get post not working in postman not recieving the body in data struct
+
 	if err != nil {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
 		return
@@ -66,13 +68,6 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "DataNotFetched", http.StatusBadRequest)
 		return
 	}
-
-	// defer res.Body.Close()
-
-	// if res.StatusCode != 200 {
-	// 	http.Error(w, "NotOk", http.StatusBadRequest)
-	// 	return
-	// }
 
 	client := http.Client{}
 
