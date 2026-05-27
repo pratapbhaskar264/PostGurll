@@ -54,7 +54,8 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	bodyReader = bytes.NewBuffer(data.Payload)
 
-	res, err := http.NewRequest(data.Method, data.URL, bodyReader)
+	res, err := http.NewRequest(data.Method, data.URL, bodyReader) // envelop created request to the url with method
+	//and body has nothing to do with content type
 
 	if err != nil {
 		fmt.Print("error in fetching data ", data.URL, err)
@@ -63,7 +64,8 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	start := time.Now()
-	res.Header.Set("Content-Type", "application/json")
+	res.Header.Set("Content-Type", "application/json") // headers are set for the request we are making to the url
+
 	client := http.Client{}
 
 	respo, err := client.Do(res)
