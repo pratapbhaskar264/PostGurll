@@ -71,6 +71,7 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	redirectHops := make([]string, 0)
 
 	client := http.Client{
+		//custom hook that will justify latency due to redirections and also give us the urls of the redirections
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			redirectHops = append(redirectHops, req.URL.String())
 			return nil
