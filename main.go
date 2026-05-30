@@ -66,9 +66,18 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	res.Header.Set("Content-Type", "application/json") // headers are set for the request we are making to the url
 
-	client := http.Client{}
+	// var redirectHops []string
+	// Do this right at the start of your function
+	redirectHops := make([]string, 0)
 
-	respo, err := client.Do(res) // opens a low-level network socket connection to the target server over the internet, 
+	client := http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			redirectHops = append(redirectHops, req.URL.String())
+			return nil
+		},
+	}
+
+	respo, err := client.Do(res) // opens a low-level network socket connection to the target server over the internet,
 	// streams your headers and payload bytes across the wire, and waits to hand you back the response (respo).
 
 	if err != nil || respo.StatusCode >= 400 {
@@ -77,8 +86,8 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	// lets set outgoing header to json for the request we are making to the url 
-    //OR 
+	// lets set outgoing header to json for the request we are making to the url
+	//OR
 	//"Hey, Postgurrll is about to send you a JSON object containing
 	//  the telemetry ID, the latency, and the target's data. Prepare your UI to format it as JSON."
 
@@ -95,12 +104,14 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		ID        string          `json:"id"`
 		LatencyMS int64           `json:"latency_ms"`
+		Hops      []string        `json:"hops"`
 		Data      json.RawMessage `json:"data"`
 	}
 
 	responseBodyFinal := response{
 		ID:        "REQ-" + strconv.Itoa(os.Getpid()),
 		LatencyMS: time.Since(start).Milliseconds(),
+		Hops:      redirectHops,
 		Data:      json.RawMessage(bodyBytes),
 	}
 
