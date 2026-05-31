@@ -35,10 +35,10 @@ func Greet(w http.ResponseWriter, r *http.Request) {
 func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	var data struct {
-		URL     string            `json:"url"`
-		Method  string            `json:"method"`
-		Headers map[string]string `json:"headers`
-		Payload json.RawMessage   `json:"payload"`
+		URL     string              `json:"url"`
+		Method  string              `json:"method"`
+		Headers map[string][]string `json:"headers`
+		Payload json.RawMessage     `json:"payload"`
 	}
 	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -68,8 +68,10 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	res.Header.Set("Content-Type", "application/json") // headers are set for the request we are making to the url
 
 	// every single header to other machine
-	for key, value := range data.Headers {
-		res.Header.Set(key, value)
+	for key, values := range data.Headers {
+		for _, val1 := range values {
+			res.Header.Add(key, val1)
+		}
 	}
 
 	// var redirectHops []string
