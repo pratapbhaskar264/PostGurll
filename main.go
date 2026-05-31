@@ -105,22 +105,26 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	bodyBytes, err := io.ReadAll(respo.Body)
 
+	targetHeaders := respo.Header
+
 	if err != nil {
 		http.Error(w, "failed to read response body", http.StatusInternalServerError)
 		return
 	}
 
 	type response struct {
-		ID        string          `json:"id"`
-		LatencyMS int64           `json:"latency_ms"`
-		Hops      []string        `json:"hops"`
-		Data      json.RawMessage `json:"data"`
+		ID        string              `json:"id"`
+		LatencyMS int64               `json:"latency_ms"`
+		Hops      []string            `json:"hops"`
+		Headers   map[string][]string `json:"headers"`
+		Data      json.RawMessage     `json:"data"`
 	}
 
 	responseBodyFinal := response{
 		ID:        "REQ-" + strconv.Itoa(os.Getpid()),
 		LatencyMS: time.Since(start).Milliseconds(),
 		Hops:      redirectHops,
+		Headers:   targetHeaders,
 		Data:      json.RawMessage(bodyBytes),
 	}
 
