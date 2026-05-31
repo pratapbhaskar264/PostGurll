@@ -35,9 +35,10 @@ func Greet(w http.ResponseWriter, r *http.Request) {
 func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	var data struct {
-		URL     string          `json:"url"`
-		Method  string          `json:"method"`
-		Payload json.RawMessage `json:"payload"`
+		URL     string            `json:"url"`
+		Method  string            `json:"method"`
+		Headers map[string]string `json:"headers`
+		Payload json.RawMessage   `json:"payload"`
 	}
 	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
