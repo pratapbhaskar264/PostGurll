@@ -67,6 +67,11 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	res.Header.Set("Content-Type", "application/json") // headers are set for the request we are making to the url
 
+	// every single header to other machine
+	for key, value := range data.Headers {
+		res.Header.Set(key, value)
+	}
+
 	// var redirectHops []string
 	// Do this right at the start of your function
 	redirectHops := make([]string, 0)
