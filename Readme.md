@@ -17,3 +17,9 @@
                                                              "Cache-Control": ["no-cache"]
                                                           }
                                                         }
+
+
+
+
+                                                        ---
+When you pass that empty string directly into Go’s http.NewRequest(method, url, body), the function is designed to be highly resilient. Under the hood, Go checks if the method string is empty, and if it is, it automatically defaults to "GET".
