@@ -21,7 +21,7 @@ func Greet(w http.ResponseWriter, r *http.Request) {
 		Class int    `json:"class"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := json.NewDecoder(r.Body).Decode(&data) // r.body is the actual data from client
 
 	if err != nil {
 		http.Error(w, "InvalidBodyRequest", http.StatusBadRequest)
@@ -41,7 +41,6 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		Payload json.RawMessage     `json:"payload"`
 	}
 
-	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
 
 	// get post not working in postman not recieving the body in data struct
@@ -49,6 +48,13 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, "InvalidBodyFormat", http.StatusBadRequest)
+		return
+	}
+
+	valid := validateJSON(data.Payload)
+
+	if !valid {
+		http.Error(w, "Invalid Payload Format", http.StatusBadRequest)
 		return
 	}
 
