@@ -58,16 +58,15 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if data.Method == "" {
+		http.Error(w, "HTTP method is required", http.StatusBadRequest)
+		return
+	}
 	var bodyReader io.Reader
 
 	bodyReader = bytes.NewBuffer(data.Payload)
 
 	fmt.Print(data.Method)
-
-	if data.Method == "" {
-		http.Error(w, "HTTP method is required", http.StatusBadRequest)
-		return
-	}
 
 	res, err := http.NewRequest(data.Method, data.URL, bodyReader) // envelop created request to the url with method
 	//and body has nothing to do with content type
