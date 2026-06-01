@@ -40,6 +40,7 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		Headers map[string][]string `json:"headers`
 		Payload json.RawMessage     `json:"payload"`
 	}
+
 	fmt.Println("dataFetch called", data.URL)
 	err := json.NewDecoder(r.Body).Decode(&data)
 
@@ -137,6 +138,10 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func validateJSON(jsonData []byte) bool { // json validator
+	return json.Valid(jsonData)
 }
 
 func main() {
