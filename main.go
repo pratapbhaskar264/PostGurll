@@ -61,7 +61,7 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	if data.Method == "" {
 		http.Error(w, "HTTP method is required", http.StatusBadRequest)
 		return
-	}
+	} // because empty method is replaced with GET by default in http.NewRequest
 	var bodyReader io.Reader
 
 	bodyReader = bytes.NewBuffer(data.Payload)
@@ -78,7 +78,8 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	start := time.Now()
-	res.Header.Set("Content-Type", "application/json") // headers are set for the request we are making to the url
+	res.Header.Set("Content-Type", "application/json") // headers are set for the request ->
+	// -> we are making to the url
 
 	// every single header to other machine
 	for key, values := range data.Headers {
@@ -92,15 +93,18 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	redirectHops := make([]string, 0)
 
 	client := http.Client{
-		//custom hook that will justify latency due to redirections and also give us the urls of the redirections
+		//custom hook that will justify latency due to redirections \
+		// and also give us the urls of the redirections
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			redirectHops = append(redirectHops, req.URL.String())
 			return nil
 		},
 	}
 
-	respo, err := client.Do(res) // opens a low-level network socket connection to the target server over the internet,
-	// streams your headers and payload bytes across the wire, and waits to hand you back the response (respo).
+	respo, err := client.Do(res) // opens a low-level network socket
+	//  connection to the target server over the internet,
+	// streams your headers and payload bytes across the wire,
+	//  and waits to hand you back the response (respo).
 
 	if err != nil || respo.StatusCode >= 400 {
 		http.Error(w, "failed to read response ", http.StatusInternalServerError)
@@ -144,6 +148,11 @@ func dataFetch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	err1 := json.NewEncoder(w).Encode(responseBodyFinal)
+	//Writing to w inside a Go HTTP handler serves the same
+	//  ultimate purpose as a return statement in a controller or
+	// servlet method in Java
+	// (like Spring's @ResponseBody or returning a ResponseEntity).
+	// It is the mechanism that delivers the final data back to the client.
 
 	if err1 != nil {
 		http.Error(w, "Encoding failed", http.StatusInternalServerError)
